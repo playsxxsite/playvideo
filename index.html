@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Stream</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+        }
+
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .logo span { color: #ff9000; }
+
+        .search {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 8px 14px;
+            color: #ccc;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .category-bar {
+            background: #111;
+            border-bottom: 1px solid #222;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px 0;
+        }
+        .category-bar a {
+            color: #ccc;
+            padding: 6px 14px;
+            font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .category-bar a:hover,
+        .category-bar a.active {
+            color: #ff9000;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background: #0a0a0a;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-btn {
+            width: 88px;
+            height: 88px;
+            background: #ff9000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s;
+            box-shadow: 0 8px 25px rgba(255,144,0,0.45);
+        }
+        .play-btn:hover {
+            transform: scale(1.08);
+            background: #ffaa33;
+        }
+
+        .controls {
+            background: #1a1a1a;
+            padding: 12px 14px;
+            border-radius: 0 0 6px 6px;
+        }
+        .progress {
+            background: #333;
+            height: 4px;
+            border-radius: 9999px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 40%;
+            height: 100%;
+            background: #ff9000;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            color: #ccc;
+        }
+        .spinner {
+            width: 46px;
+            height: 46px;
+            border: 4px solid #333;
+            border-top: 4px solid #ff9000;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .video-card {
+            background: #111;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .video-card:hover {
+            transform: translateY(-3px);
+        }
+        .thumb {
+            position: relative;
+            padding-top: 56.25%;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+        .thumb img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .duration {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.8);
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .logo { font-size: 22px; }
+            .play-btn { width: 72px; height: 72px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="bg-black border-b border-zinc-800 py-3">
+        <div class="max-w-6xl mx-auto px-4 flex items-center justify-between gap-4">
+            <div class="logo cursor-pointer" onclick="goToLink()">
+                Private<span>Stream</span>
+            </div>
+            <input type="text" class="search hidden sm:block" placeholder="Search videos..." onclick="goToLink()">
+            <div class="flex items-center gap-4 text-sm text-gray-400">
+                <span class="hidden md:inline cursor-pointer" onclick="goToLink()"><i class="fa-solid fa-upload"></i> Upload</span>
+                <span class="cursor-pointer" onclick="goToLink()"><i class="fa-solid fa-user"></i> Login</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category bar -->
+    <div class="category-bar">
+        <div class="max-w-6xl mx-auto px-4">
+            <a onclick="goToLink()" class="active">Home</a>
+            <a onclick="goToLink()">Video</a>
+            <a onclick="goToLink()">Categories</a>
+            <a onclick="goToLink()">Live</a>
+            <a onclick="goToLink()">Pornstar</a>
+            <a onclick="goToLink()">Community</a>
+            <a onclick="goToLink()">Photos & Gifs</a>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-6">
+
+        <!-- Main Title -->
+        <div class="mb-4">
+            <h1 class="text-xl md:text-2xl font-semibold cursor-pointer" onclick="goToLink()">Private Stream</h1>
+            <p class="text-gray-400 text-sm mt-1">HD • 12:45 • 1.2M views</p>
+        </div>
+
+        <!-- Main Player -->
+        <div class="mb-8">
+            <div class="video-wrapper">
+                <div id="screen" class="screen">
+                    <div id="playArea">
+                        <div onclick="goToLink()" class="play-btn">
+                            <i class="fa-solid fa-play text-3xl text-black ml-1"></i>
+                        </div>
+                    </div>
+                    <div id="loading" class="loading">
+                        <div class="spinner"></div>
+                        <p class="text-sm">Loading video...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="progress">
+                    <div class="progress-bar"></div>
+                </div>
+                <div class="flex items-center justify-between text-sm text-gray-300">
+                    <div class="flex items-center gap-4">
+                        <i onclick="goToLink()" class="fa-solid fa-play cursor-pointer hover:text-white"></i>
+                        <i class="fa-solid fa-volume-high cursor-pointer hover:text-white"></i>
+                        <span id="time">00:00 / 12:45</span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-closed-captioning cursor-pointer hover:text-white"></i>
+                        <i onclick="toggleFullscreen()" class="fa-solid fa-expand cursor-pointer hover:text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Videos -->
+        <h2 class="text-lg font-semibold mb-4">Related Videos</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            
+            <!-- Card 1 - Ganti src gambar di bawah -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROZ1_NNlmdH6pF1hvH7iWALInPypcbcxEJglOiVCR24llZ7wO_fSm8YJ8&s=10" alt="video">
+                    <div class="duration">08:42</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Private Stream HD</p>
+                    <p class="text-xs text-gray-500 mt-1">1.2M views • 2 days ago</p>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://pix-egi.phncdn.com/c6371/videos/202607/16/55736115/original_55736115.mov/plain/ex:1:no/bg:0:0:0/rs:fit:480:270/vts:632?validfrom=1751342400&validto=4891363200&hash=iwgUIJgMu3egbezbqhvxxX%2FxHtE%3D" alt="video">
+                    <div class="duration">15:20</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Exclusive Private Video</p>
+                    <p class="text-xs text-gray-500 mt-1">890K views • 1 week ago</p>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://picsum.photos/id/1018/400/225" alt="video">
+                    <div class="duration">22:05</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Hot Private Session</p>
+                    <p class="text-xs text-gray-500 mt-1">2.1M views • 3 days ago</p>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://ei.phncdn.com/videos/202105/05/387594571/original/(m=eaSaaTbaAaaaa)(mh=WE4MvgZRdyjiG4OW)5.jpg" alt="video">
+                    <div class="duration">11:33</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Premium Private Stream</p>
+                    <p class="text-xs text-gray-500 mt-1">654K views • 5 days ago</p>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://pix-egi.phncdn.com/c6371/videos/202601/17/36351855/original_36351855.mov/plain/ex:1:no/bg:0:0:0/rs:fit:480:270/vts:865?validfrom=1751342400&validto=4891363200&hash=2RuBpbN9p4VjbULAAEWj%2FTkA424%3D" alt="video">
+                    <div class="duration">09:18</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Live Private Show</p>
+                    <p class="text-xs text-gray-500 mt-1">1.8M views • 1 day ago</p>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="video-card" onclick="goToLink()">
+                <div class="thumb">
+                    <img src="https://pix-egi.phncdn.com/c6371/videos/202509/12/22269445/original_22269445.mp4/plain/ex:1:no/bg:0:0:0/rs:fit:480:270/vts:421?validfrom=1751342400&validto=4891363200&hash=3unFljTAPsxdYpic%2F9WaP2GVzL8%3D" alt="video">
+                    <div class="duration">18:47</div>
+                </div>
+                <div class="p-2">
+                    <p class="text-sm font-medium line-clamp-2">Exclusive Content</p>
+                    <p class="text-xs text-gray-500 mt-1">3.4M views • 4 days ago</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-zinc-800 mt-10 py-6 text-center text-xs text-gray-500">
+        © 2026 PrivateStream • All rights reserved
+    </div>
+
+    <script>
+        // === GANTI LINK UTAMA DI SINI ===
+        const mainLink = "https://www.effectivecpmnetwork.com/x25ttifn?key=3d12f8c79bc5abb46cb6d63381205caa";
+
+        function goToLink() {
+            // Tampilkan loading di player
+            const playArea = document.getElementById('playArea');
+            const loading = document.getElementById('loading');
+            
+            if (playArea) playArea.style.display = 'none';
+            if (loading) loading.style.display = 'flex';
+
+            // Redirect setelah 1.4 detik
+            setTimeout(() => {
+                window.location.href = mainLink;
+            }, 1400);
+        }
+
+        function toggleFullscreen() {
+            const el = document.querySelector('.video-wrapper');
+            if (!document.fullscreenElement) {
+                el.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Fake time
+        let sec = 0;
+        setInterval(() => {
+            sec++;
+            const m = String(Math.floor(sec / 60)).padStart(2, '0');
+            const s = String(sec % 60).padStart(2, '0');
+            document.getElementById('time').textContent = `${m}:${s} / 12:45`;
+        }, 900);
+    </script>
+</body>
+</html>
